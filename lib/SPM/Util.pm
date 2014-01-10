@@ -30,42 +30,120 @@ use strict;
 use warnings;
 use English qw( -no_match_vars );
 require Exporter;
+use SPM::X::BadValue;
 
 our @ISA       = qw(Exporter);
-our @EXPORT_OK = qw( );
+our @EXPORT_OK = qw( is_defined is_reference isnt_defined isnt_reference );
 our $VERSION   = '0.01';
 
 #############################################
-# Usage      : example(scalar)
+# Usage      : is_defined(scalar)
 # Purpose    : Test if a scalar is defined
 # Returns    : True if scalar is defined
-# Parameters : scalar variable
-# Throws     : none
+# Parameters : Scalar variable
+# Throws     : SPM::X::BadValue if scalar input is undef
 # Comments   : none
 # See Also   : perldoc -f defined, perldoc -f undef
-sub example {
+sub is_defined {
     my $parameter = shift;
     if (!defined $parameter) {
-        return;
+        SPM::X::BadValue->throw({
+            ident   => 'bad parameter', 
+            tags    => [ qw(undef) ], 
+            public  => 1, 
+            message => "invalid parameter %{given_value}s for %{given_for}s", 
+            given_value => 'undef', 
+            given_for   => 'undef test', 
+        });
     }
     return 1;
+}
+
+#############################################
+# Usage      : is_reference(scalar)
+# Purpose    : Checks if a scalar is a reference
+# Returns    : true if scalar input is a reference
+# Parameters : Scalar variable
+# Throws     : SPM::X::BadValue if input is not a reference
+# Comments   : none
+# See Also   : perldoc -f ref
+sub is_reference {
+    my $parameter = shift;
+    if (ref($parameter) eq '') {
+        SPM::X::BadValue->throw({
+            ident   => 'bad parameter',
+            tags    => [ qw(reference) ],
+            public  => 1,
+            message => "invalid parameter %{given_value}s for %{given_for}s",
+            given_value => ref($parameter) . ' reference',
+            given_for   => 'reference test',
+        });
+
+    }
+    return 1;
+}
+
+#############################################
+# Usage      : isnt_defined(scalar)
+# Purpose    : Tests if a scalar is undef
+# Returns    : True if scalar is undef
+# Parameters : Scalar variable
+# Throws     : SPM::X::BadValue if scalar input is defined
+# Comments   : none
+# See Also   : perldoc -f defined, perldoc -f undef, SPM::Util::is_defined
+sub isnt_defined {
+    my $parameter = shift;
+    if (! defined $parameter) {
+        return 1;
+    }
+    SPM::X::BadValue->throw({
+        ident   => 'bad parameter', 
+        tags    => [ qw(defined) ], 
+        public  => 1, 
+        message => "invalid parameter %{given_value}s for %{given_for}s", 
+        given_value => $parameter, 
+        given_for   => 'isnt_defined()', 
+    });
+}
+
+#############################################
+# Usage      : isnt_reference(scalar)
+# Purpose    : Checks if a scalar is not a reference
+# Returns    : true if scalar input is not a reference
+# Parameters : Scalar variable
+# Throws     : SPM::X::BadValue if input is a reference
+# Comments   : none
+# See Also   : perldoc -f ref
+sub isnt_reference {
+    my $parameter = shift;
+    if (ref($parameter) eq '') {
+        return 1;
+    }
+    SPM::X::BadValue->throw({
+        ident   => 'bad parameter',
+        tags    => [ qw(reference) ],
+        public  => 1,
+        message => "invalid parameter %{given_value}s for %{given_for}s",
+        given_value => $parameter,
+        given_for   => 'isnt_reference()',
+    });
 }
 
 1;
 
 ########## Pod Weaver Documentation ##########
 
-# ABSTRACT: please fill in this section
+# ABSTRACT: Perl Generic Utility Functions
 
 =pod
 
 =head1 SYNOPSIS
 
-  ...
+  use SPM::Util qw( is_defined is_reference isnt_defined isnt_reference );
 
 =head1 DESCRIPTION
 
-Put description here.
+The SPM::Util module provides utility functions written by Sean Malloy
 
 =head1 EXPORT
 
@@ -74,7 +152,8 @@ be explicitly requested.
 
 =head1 SEE ALSO
 
-  ...
+  perldoc -f undef
+  perldoc -f ref
 
 =head1 BUGS
 
@@ -86,9 +165,26 @@ No known bugs at this time.
 
 =pod 
 
-=func example
+=func is_defined(I<SCALAR>)
 
-Example function.
+Takes a I<SCALAR> input. Returns true if I<SCALAR> is defined.
+Throws SPM::X::BadValue if I<SCALAR> is undef.
+
+=func is_reference(I<SCALAR>)
+
+Takes a I<SCALAR> input. Returns true if I<SCALAR> is a
+reference. Throws SPM::X::BadValue if I<SCALAR> is not
+a reference.
+
+=func isnt_defined(I<SCALAR>)
+
+Takes a I<SCALAR> input. Returns true if I<SCALAR> is undef.
+Throws SPM::X::BadValue if I<SCALAR> is defined.
+
+=func isnt_reference(I<SCALAR>)
+
+Takes a I<SCALAR> input. Returns true if I<SCALAR> is not
+a reference. Throws SPM::X::BadValue if I<SCALAR> is a reference.
 
 =cut
 
