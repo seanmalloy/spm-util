@@ -1,4 +1,4 @@
 Perl Module SPM-Util
 ================================
-blah blah blah
+Sean Malloy's utility Perl modules.
 
